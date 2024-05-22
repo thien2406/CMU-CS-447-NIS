@@ -1,0 +1,58 @@
+#showButton{
+    background-image: url(icon/try-me.gif);
+    background-size: cover;
+    height: 100px;
+    width: 150px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 15px;
+}
+#showButton:active {
+    opacity: 0.8; /* Giảm độ trong suốt khi nút được nhấn */
+}
+#ipnet{
+    margin-top: 1px;
+    padding-left: 60px;
+    
+}
+#imgIPNet{
+    font-size: 20px;
+}
+#imgvoltageOutput{
+    
+    border-color: grey;
+    font-weight: bold ;
+}
+#tbicon{
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    border-radius: 115px;
+}
+#acImage{
+    width: 70px;
+    height: 55px;
+}
+#acButton{
+    border: none;       /* Xóa viền */
+  background: none;   /* Xóa nền */
+  cursor: pointer;
+}
+#acautoImage{
+    width: 70px;
+    height: 45px;
+}
+#acautoButton{
+    border: none;       /* Xóa viền */
+    background: none;   /* Xóa nền */
+    cursor: pointer;
+}
+#caidat{
+    color: red;
+    display: grid;
+    place-items: center;
+    font-size: medium;
+}

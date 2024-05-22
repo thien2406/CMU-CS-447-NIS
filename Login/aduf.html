@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADUF MPPT Dashboard</title>
+  <link rel="stylesheet" href="aduf.css">
+  <style>
+    .iconDisplay{
+      
+      width: 80%;
+      font-size: 25px;
+    }
+    .xoay180{
+      transform: rotate(180deg);
+    }
+    .textimg{
+      text-align: center;
+    }
+    .hidden{
+      display: none;
+    }
+    .tschitiet{
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>ADUF MPPT Dashboard</h1>
+  
+  <!-- Thẻ div để hiển thị dữ liệu -->
+  <div>
+    <table class="iconDisplay" id="tbicon">
+      <tr>
+        <td>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <img src="icon/solar-system.png" width="110px" height="95px">
+        </td>
+        <td>
+          <img src="icon/fast-forward.gif"  width="60px" >
+          </td>
+          <td>
+            <img src="icon/smart-energy.png" width="100px" >
+            </td>
+            <td>
+            <img src="icon/fast-forward.gif"  width="60px" >
+            </td>  
+            <td>
+            <img src="icon/electrical-outlet-inspection.png" width="100px" >
+            </td>  
+              <td>
+            <img id="imgacout" src="icon/fast-backward.gif"  width="60px" >
+                  </td>
+            <td>
+            <img src="icon/power-plant.png" width="100px" >
+            
+            </td>      
+            <td>
+              <img id="ipnet" src="icon/internet.gif"  width="40px" >
+             
+            </td>
+            <td>
+              <p id="imgIPNet"></p>
+            </td>
+  </tr>
+  <tr class="textimg">
+    <td>
+      <p id="imgvoltageInput"></p>
+      <p id="imgWh"></p>
+    </td>
+    <td>
+      <img src="icon/fast-forward.gif"  width="60px" >
+      </td>
+      <td>
+        <p id="imgpowerOut"></p>
+        <p id="imgtemp"></p>
+      </td>
+      <td>
+        <img src="icon/fast-forward.gif"  width="60px" >
+        </td>
+        <td>
+          <p id="imgvoltageOutput"></p>
+          <p id="imgbatteryPercent"></p>
+        </td>
+        <td>
+          <img id="imgacout2" src="icon/electricity.gif"  width="60px"  >
+          </td>
+          <td>
+            <button id="acButton" onclick="toggleACout220v()">
+              <img id="acImage">
+            </button><br>
+            <button id="acautoButton" onclick="togglecontrolACout220v()">
+              <img id="acautoImage">
+            </button>
+          </td>
+</tr>
+<tr>
+  
+</tr>
+  </table>
+  <button id="caidat">
+    <img src="icon/settings.svg" width="60px" height="60px">
+    Cài đặt thông số
+  </button>
+  <br>
+     <button id="showButton">
+      Thông số chi tiết
+    </button>
+  </div> <br>
+  <div id="dataDisplay" class="tschitiet">
+    <p id="powerOut">Power Out: </p>
+    <p id="batteryPercent">Battery Percent: </p>
+    <p id="voltageInput">Voltage Input: </p>
+    <p id="currentInput">Current Input: </p>
+    <p id="voltageOutput">Voltage Output: </p>
+    <p id="currentOutput">Current Output: </p>
+    <p id="temperature">Temperature: </p>
+    <p id="Wh">Wh: </p>
+    <p id="energySavings">Energy Savings: </p>
+    <p id="voltageBatteryMin">Voltage Battery Min: </p>
+    <p id="voltageBatteryMax">Voltage Battery Max: </p>
+    <p id="currentCharging">Current Charging: </p>
+    <p id="BCS">Battery Charging Status: </p>
+    <p id="FCS">Full Charge Status: </p>
+    <p id="LBS">Low Battery Status: </p>
+    <p id="PIPS">PV Input Presence Status: </p>
+    <p id="IPNet">IP Net: </p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD2asfp-ADsnFS4qieesydEJ2SBYEVc3gg",
+      authDomain: "adufmppt.firebaseapp.com",
+      databaseURL: "https://adufmppt-default-rtdb.firebaseio.com",
+      projectId: "adufmppt",
+      storageBucket: "adufmppt.appspot.com",
+      messagingSenderId: "487524120487",
+      appId: "1:487524120487:web:dae8d8f3d0558f8de9a882",
+      measurementId: "G-ZGEGL3RF2C"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
+
+    let powerOutValue ;
+    let batteryPercentValue;
+    let VoltageInputValue;
+    let voltageOutputValue;
+  
+
+    function setView() {
+      set(ref(db, 'ADUFMPPT/View'), 1)
+        .then(() => {
+          console.log("Set 'View' to 1 successful");
+        })
+        .catch((error) => {
+          console.error("Error setting 'View' to 1:", error);
+        });
+    }
+    
+    
+
+function hideAllSpecificImagesInTable(xacnhan) {
+    // Lấy tất cả thẻ <img> có src="icon/fast-forward.gif" trong table có id là "tbicon"
+    var imgElements = document.querySelectorAll('#tbicon img[src="icon/fast-forward.gif"]');
+if(xacnhan=="true")
+    // Lặp qua từng thẻ <img> và đặt nội dung của thẻ <td> thành chuỗi rỗng
+    imgElements.forEach(function(imgElement) {
+      imgElement.style.visibility = 'hidden';
+    });
+    else imgElements.forEach(function(imgElement) {
+      imgElement.style.visibility = 'visible';
+    });
+}
+
+function xulybutton(){
+  var showButton = document.getElementById('showButton');
+        var myDiv = document.getElementById('dataDisplay');
+
+        // Gắn sự kiện click cho button
+        showButton.addEventListener('click', function() {
+            // Kiểm tra trạng thái hiện tại của thẻ div
+            if (myDiv.style.display === 'none' || myDiv.style.display === '') {
+                // Nếu ẩn, thì hiển thị
+                myDiv.style.display = 'block';
+            } else {
+                // Nếu đang hiển thị, thì ẩn
+                myDiv.style.display = 'none';
+            }
+        });
+}
+function btCaidatthongso(){
+  var btsetting = document.getElementById('caidat');
+       
+
+        // Gắn sự kiện click cho button
+        btsetting.addEventListener('click', function() {
+            // Kiểm tra trạng thái hiện tại của thẻ div
+            window.location.href = "EnergyDashboard.html";
+        });
+}
+
+function toggleACout220v() {
+  const acControl = ref(db, 'ADUFMPPT/controlACout220v');
+  // Lấy dữ liệu một lần
+  get(acControl).then((snapshot) => {
+    const controlACValue = snapshot.val();
+
+    // Kiểm tra giá trị trước khi thay đổi
+    if (controlACValue != 1 && typeof controlACValue === 'number') {
+  const acRef = ref(db, 'ADUFMPPT/ACout220v');
+  
+  // Lấy dữ liệu một lần
+  get(acRef).then((snapshot) => {
+    const currentACValue = snapshot.val();
+
+    // Kiểm tra giá trị trước khi thay đổi
+    if (currentACValue !== null && typeof currentACValue === 'number') {
+      // Toggle giá trị (1 thành 0, 0 thành 1)
+      const newACValue = currentACValue === 1 ? 0 : 1;
+
+      // Cập nhật giá trị trong Firebase
+      set(acRef, newACValue);
+
+      // Cập nhật hình ảnh nút dựa trên giá trị mới
+      // (Thêm mã để cập nhật hình ảnh nút nếu cần)
+
+    } else {
+      console.log("No data available or invalid data type");
+    }
+  }).catch((error) => {
+    console.error("Error getting ACout220v value:", error);
+  });
+} else {
+      console.log("Lock Manual Control AC220v Out");
+    }
+  } ).catch((error) => {
+    console.error("Error getting ACout220v  value:", error);
+  });
+}
+
+document.getElementById('acButton').onclick = toggleACout220v;
+
+function togglecontrolACout220v(){
+  const acControl = ref(db, 'ADUFMPPT/controlACout220v');
+  // Lấy dữ liệu một lần
+  get(acControl).then((snapshot) => {
+    const controlACValue = snapshot.val();
+
+    // Kiểm tra giá trị trước khi thay đổi
+    if (controlACValue !== null && typeof controlACValue === 'number') {
+      // Toggle giá trị (1 thành 0, 0 thành 1)
+      const newValueControl = controlACValue === 1 ? 0 : 1;
+      
+   
+      // Cập nhật giá trị trong Firebase
+      set(acControl, newValueControl);
+
+      // Cập nhật hình ảnh nút dựa trên giá trị mới
+      // (Thêm mã để cập nhật hình ảnh nút nếu cần)
+
+    } else {
+      console.log("No data controlACout220vValue available or invalid data type");
+    }
+  }).catch((error) => {
+    console.error("Error getting ACout220v  value:", error);
+  });
+}
+document.getElementById('acautoButton').onclick = togglecontrolACout220v;
+
+    function updateHTML(data) {
+      var outvol = document.getElementById('imgvoltageOutput');
+
+       powerOutValue = typeof data.PowerOut === 'number' ? data.PowerOut : 'N/A';
+       batteryPercentValue = typeof data.batteryPercent === 'number' ? data.batteryPercent : 'N/A';
+       VoltageInputValue = typeof data.VoltageInput === 'number' ? data.VoltageInput : 'N/A';
+       voltageOutputValue = typeof data.voltageOutput === 'number' ? data.voltageOutput : 'N/A';
+      let temperatureValue = typeof data.temperature === 'number' ? data.temperature : 'N/A';
+      let ipnetValue = typeof data.IPNet === 'string' ? data.IPNet : 'N/A';
+      let ACout220vValue = typeof data.ACout220v === 'number' ? data.ACout220v : 'N/A';
+      let controlACout220vValue = typeof data.controlACout220v === 'number' ? data.controlACout220v : 'N/A';
+      let whValue = typeof data.Wh === 'number' ? data.Wh : 'N/A';
+      // Update HTML with the retrieved data
+      document.getElementById('powerOut').textContent = `Công suất cho ra: ${powerOutValue}W`;
+      document.getElementById('imgpowerOut').textContent = `${parseFloat(powerOutValue).toFixed(2)} W`;
+      document.getElementById('batteryPercent').textContent = `Battery Percent: ${batteryPercentValue}`;
+      document.getElementById('imgbatteryPercent').textContent = `${batteryPercentValue}%`;
+      document.getElementById('voltageInput').textContent = `Voltage Input: ${VoltageInputValue}`;
+      document.getElementById('imgvoltageInput').textContent = `${parseFloat(VoltageInputValue).toFixed(2)} V`;
+      document.getElementById('currentInput').textContent = `current Input: ${data.currentInput }`;
+      document.getElementById('voltageOutput').textContent = `voltage Output: ${voltageOutputValue }`;
+      document.getElementById('imgvoltageOutput').textContent = `${parseFloat(voltageOutputValue).toFixed(2) } V`;
+      document.getElementById('currentOutput').textContent = `current Output: ${data.currentOutput }`;
+      document.getElementById('temperature').textContent = `temperature: ${temperatureValue }`;
+      document.getElementById('imgtemp').textContent = `${temperatureValue }°C`;
+
+      document.getElementById('Wh').textContent = `Wh: ${whValue }`;
+      document.getElementById('imgWh').textContent = `${parseFloat(whValue).toFixed(2) }Wh`;
+      document.getElementById('energySavings').textContent = `energy Savings: ${data.energySavings }`;
+      document.getElementById('voltageBatteryMin').textContent = `Voltage Battery Min: ${data.voltageBatteryMin }`;
+      document.getElementById('voltageBatteryMax').textContent = `Voltage Battery Max: ${data.voltageBatteryMax }`;
+      document.getElementById('currentCharging').textContent = `current Charging: ${data.currentCharging }`;
+
+      document.getElementById('BCS').textContent = `Battery Charging Status: ${data.BCS }`;
+      document.getElementById('FCS').textContent = `Full Charge Status: ${data.FCS }`;
+      document.getElementById('LBS').textContent = `Low Battery Status: ${data.LBS }`;
+      document.getElementById('PIPS').textContent = `PV Input Presence Status: ${data.PIPS }`;
+      document.getElementById('IPNet').textContent = `IpNet: ${ipnetValue}`;
+      document.getElementById('imgIPNet').textContent = `${ipnetValue}`;
+      console.log("HTML updated");
+      console.log("powerOutValue: ", powerOutValue);
+    
+    if( powerOutValue === 0 ) hideAllSpecificImagesInTable('true');
+    else  hideAllSpecificImagesInTable('false');
+      if(voltageOutputValue<12.8) document.getElementById('imgvoltageOutput').style.color = 'red';
+      else document.getElementById('imgvoltageOutput').style.color = 'green';
+
+      const imgacout = document.getElementById('imgacout');
+        const imgacout2 = document.getElementById('imgacout2');
+      if(ACout220vValue==1){
+          const acImage = document.getElementById('acImage');
+          acImage.src = 'icon/on-button.png';
+          imgacout.style.visibility = 'visible';
+          imgacout2.style.visibility = 'visible';
+        } else {
+          acImage.src = 'icon/toggle.png';
+          imgacout.style.visibility = 'hidden';
+          imgacout2.style.visibility = 'hidden';
+        }
+        const acButton = document.getElementById('acButton');
+        
+      
+        if(controlACout220vValue==1){
+         
+      acButton.setAttribute('style', 'opacity: 0.5; transition: opacity 0.3s;');
+          
+          const acautoImage = document.getElementById('acautoImage');
+          acautoImage.src = 'icon/coffee-shop.gif'
+        } else {
+          acButton.setAttribute('style', 'opacity: 1; transition: opacity 0.3s;');
+          acautoImage.src = 'icon/click.gif';
+        }
+    }
+
+    function getDataAndUpdateHTML() {
+      // Subscribe to changes in the Firebase database
+      onValue(ref(db, 'ADUFMPPT'), (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          updateHTML(data);
+        } else {
+          console.log("No data available");
+        }
+      });
+    }
+//////-----------main--------------///////////
+    // Set 'View' to 1 when the page is loaded
+    setView();
+
+    // Get data and update HTML when the page is loaded
+    getDataAndUpdateHTML();
+    xulybutton();
+    btCaidatthongso();
+  </script>
+  
+</body>
+</html>
